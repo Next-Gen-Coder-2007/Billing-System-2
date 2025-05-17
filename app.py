@@ -11,6 +11,7 @@ import os
 fake = Faker()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://avnadmin:AVNS_3MFk0LeCjUtGdP0kAbL@mysql-375f5a66-billing-system2025.g.aivencloud.com:18966/defaultdb"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': {
@@ -31,6 +32,28 @@ def calculate_gst(total, gst_rate, is_interstate):
         cgst = sgst = round(total * (gst_rate / 2))
     grand_total = round(total + igst + cgst + sgst)
     return cgst, sgst, igst, grand_total
+
+def generate_bill_number():
+    # Get current year and month
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    
+    # Format: BILL-YYYYMM-001
+    prefix = f"BILL-{year}{month:02d}-"
+    
+    # Find the highest bill number with this prefix
+    last_bill = Bill.query.filter(Bill.bill_number.startswith(prefix)) \
+                         .order_by(Bill.bill_number.desc()).first()
+    
+    if last_bill:
+        try:
+            # Extract the numeric part and increment
+            last_num = int(last_bill.bill_number.split('-')[-1])
+            return f"{prefix}{last_num + 1:03d}"
+        except (ValueError, IndexError):
+            pass
+    return f"{prefix}001"  # First bill of the month
 
 def create_dummy_data():
     with app.app_context():
@@ -513,6 +536,7 @@ def create_bill():
             bill_items.append((product.id, qty, price, subtotal, qty_type))
         cgst, sgst, igst, grand_total = calculate_gst(total, gst_rate, is_interstate)
         bill = Bill(
+            bill_number=generate_bill_number(),
             customer_id=customer_id,
             is_interstate=is_interstate,
             gst_rate=gst_rate,
