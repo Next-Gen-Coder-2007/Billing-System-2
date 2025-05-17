@@ -33,11 +33,9 @@ def calculate_gst(total, gst_rate, is_interstate):
     grand_total = round(total + igst + cgst + sgst)
     return cgst, sgst, igst, grand_total
 
-def get_next_bill_number():
-    last_bill = Bill.query.order_by(Bill.number.desc()).first()
-    if last_bill:
-        return last_bill.number + 1
-    return 1  # Start from 1 if no bills exist
+def generate_bill_number():
+    last_bill = Bill.query.order_by(Bill.bill_number.desc()).first()
+    return (last_bill.bill_number + 1) if last_bill else 1
 
 def create_dummy_data():
     with app.app_context():
