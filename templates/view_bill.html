@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Bill #{{ bill.bill_number }} - Details{% endblock %}
+
+{% block content %}
+<h2>Bill Details - Bill #{{ bill.bill_number }}</h2>
+
+<p><strong>Customer:</strong> {{ bill.customer.name }}</p>
+<p><strong>Date:</strong> {{ bill.created_at.strftime('%Y-%m-%d') if bill.created_at else 'N/A' }}</p>
+
+<div class="table-responsive mt-4">
+  <table class="table table-bordered">
+      <thead class="table-light">
+          <tr>
+              <th>Product</th>
+              <th>HSN Code</th>
+              <th colspan="2" class="text-center">Quantity</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for item in items %}
+          <tr>
+              <td>{{ item.product.name }}</td>
+              <td>{{ item.product.hsn_code }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.qty_type }}</td>
+              <td>₹{{ item.price }}</td>
+              <td>₹{{ item.subtotal }}</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<hr>
+<div class="mb-3">
+  <p><strong>Total:</strong> ₹{{ bill.total_amount | round(2) }}</p>
+  <p><strong>CGST:</strong> ₹{{ bill.cgst | round(2) }}</p>
+  <p><strong>SGST:</strong> ₹{{ bill.sgst | round(2) }}</p>
+  <p><strong>IGST:</strong> ₹{{ bill.igst | round(2) }}</p>
+  <h4><strong>Grand Total:</strong> ₹{{ bill.grand_total | round(2) }}</h4>
+</div>
+
+<a href="{{ url_for('bills') }}" class="btn btn-secondary mt-3 mb-3">Back to Bills</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@media (max-width: 576px) {
+  table.table td, table.table th {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+    white-space: nowrap;
+  }
+}
+</style>
+{% endblock %}

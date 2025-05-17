@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Billing Software{% endblock %}
+
+{% block content %}
+<style>
+    .card {
+        transition: transform 0.3s;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .card-title {
+        font-weight: 600;
+    }
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    .list-unstyled li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .list-unstyled li:last-child {
+        border-bottom: none;
+    }
+    .btn-light {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-light:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Total Customers Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Total Customers</h5>
+                    <p class="card-text display-4">{{ total_customers }}</p>
+                    <a href="{{ url_for('customers') }}" class="btn btn-light">View Customers</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Bills Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Total Bills</h5>
+                    <p class="card-text display-4">{{ total_bills }}</p>
+                    <a href="{{ url_for('bills') }}" class="btn btn-light">View Bills</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Sales Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Monthly Sales</h5>
+                    <p class="card-text display-4">₹{{ monthly_sales | round(2) }}</p>
+                    <a href="{{ url_for('bills') }}" class="btn btn-light">View Sales</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Bills Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Bills</h5>
+                    <ul class="list-unstyled">
+                        {% for bill in recent_bills %}
+                        <li><a href="{{ url_for('view_bill', bill_id=bill.id) }}" class="text-white">{{ bill.id }} - ₹{{ bill.grand_total }}</a></li>
+                        {% else %}
+                        <li>No recent bills</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ url_for('bills') }}" class="btn btn-light">View All Bills</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Recent Customers Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Customers</h5>
+                    <ul class="list-unstyled">
+                        {% for customer in recent_customers %}
+                        <li>{{ customer.name }} - {{ customer.phone }}</li>
+                        {% else %}
+                        <li>No recent customers</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ url_for('customers') }}" class="btn btn-light">View All Customers</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales by Month Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Sales by Month ({{ chart_labels | first }} - {{ chart_labels | last }})</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('salesChart').getContext('2d');
+    var salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels | tojson }},
+            datasets: [{
+                label: 'Sales (₹)',
+                data: {{ chart_data | tojson }},
+                borderColor: '#FF5733',
+                backgroundColor: 'rgba(255, 87, 51, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
