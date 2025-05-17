@@ -261,36 +261,30 @@ def customer_ledger(customer_id):
         entry["balance"] = balance
 
     return render_template("ledger.html", customer=customer, entries=entries, total_balance=balance)
-
-from weasyprint import HTML
-from flask import make_response, render_template
-
 @app.route("/customers/<int:customer_id>/ledger/pdf")
 def customer_ledger_pdf(customer_id):
     customer = Customer.query.get_or_404(customer_id)
-
     entries = []
     for bill in customer.bills:
-        entries.append({"date": bill.created_at.date(), "description": f"Bill {bill.bill_number}", "debit": bill.grand_total, "credit": 0})
+        entries.append({"date": bill.created_at.date(), "description": f"Bill #{bill.bill_number}", "debit": bill.grand_total, "credit": 0})
     for payment in customer.payments:
         entries.append({"date": payment.date, "description": f"Payment via {payment.payment_gateway}", "debit": 0, "credit": payment.amount})
-
+    
     entries.sort(key=lambda x: x["date"])
     balance = 0
     for entry in entries:
         balance += entry["credit"] - entry["debit"]
         entry["balance"] = balance
-
+    
     rendered = render_template("ledger_pdf.html", customer=customer, entries=entries, total_balance=balance)
-
-    # Convert HTML to PDF using WeasyPrint
-    pdf = HTML(string=rendered).write_pdf()
-
+    
+    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
+    pdf = pdfkit.from_string(rendered, False, configuration=config)
+    
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=ledger_{customer.id}.pdf'
     return response
-
 
 @app.route("/customers/gst_ledger")
 def gst_ledger():
@@ -447,16 +441,11 @@ def supplier_ledger(supplier_id):
 
     return render_template("supplier_ledger.html", supplier=supplier, entries=entries, total_balance=balance)
 
-from weasyprint import HTML
-from flask import make_response, render_template
-from datetime import datetime
-
 @app.route("/suppliers/<int:supplier_id>/ledger/pdf")
 def supplier_ledger_pdf(supplier_id):
     supplier = Supplier.query.get_or_404(supplier_id)
-
     entries = []
-
+    
     for purchase in supplier.purchases:
         entries.append({
             "date": purchase.created_at.date() if isinstance(purchase.created_at, datetime) else purchase.created_at,
@@ -464,7 +453,7 @@ def supplier_ledger_pdf(supplier_id):
             "debit": purchase.total_amount,
             "credit": 0
         })
-
+    
     for payment in supplier.payments:
         entries.append({
             "date": payment.date.date() if isinstance(payment.date, datetime) else payment.date,
@@ -472,19 +461,19 @@ def supplier_ledger_pdf(supplier_id):
             "debit": 0,
             "credit": payment.amount
         })
-
+    
     entries.sort(key=lambda x: x["date"])
-
+    
     balance = 0
     for entry in entries:
         balance += entry["credit"] - entry["debit"]
         entry["balance"] = balance
-
+    
     rendered = render_template("supplier_ledger_pdf.html", supplier=supplier, entries=entries, total_balance=balance)
-
-    # Use WeasyPrint to render PDF
-    pdf = HTML(string=rendered).write_pdf()
-
+    
+    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
+    pdf = pdfkit.from_string(rendered, False, configuration=config)
+    
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=supplier_ledger_{supplier.id}.pdf'
