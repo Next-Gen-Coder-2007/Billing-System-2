@@ -131,7 +131,7 @@ def index():
         end_date = today.replace(month=today.month + 1, day=1) - timedelta(days=1)
     total_customers = Customer.query.count()
     total_bills = Bill.query.count()
-    monthly_sales = db.session.query(func.sum(Bill.total_amount))\
+    monthly_sales = db.session.query(func.sum(Bill.grand_total))\
         .filter(Bill.created_at >= start_date, Bill.created_at <= end_date)\
         .scalar() or 0
     low_stock_count = Product.query.filter(Product.stock < 5).count()
@@ -140,7 +140,7 @@ def index():
 
     monthly_sales_data = db.session.query(
         extract('month', Bill.created_at).label('month'),
-        func.sum(Bill.total_amount).label('total')
+        func.sum(Bill.grand_total).label('total')
     ).filter(
         extract('year', Bill.created_at) == today.year
     ).group_by('month').order_by('month').all()
@@ -237,7 +237,7 @@ def customer_ledger(customer_id):
         bill_date = bill.created_at.date() if isinstance(bill.created_at, datetime) else bill.created_at
         entries.append({
             "date": bill_date,
-            "description": f"Bill #{bill.id}",
+            "description": f"Bill {bill.bill_number}",
             "debit": bill.grand_total,
             "credit": 0
         })
@@ -271,7 +271,7 @@ def customer_ledger_pdf(customer_id):
 
     entries = []
     for bill in customer.bills:
-        entries.append({"date": bill.created_at.date(), "description": f"Bill #{bill.id}", "debit": bill.grand_total, "credit": 0})
+        entries.append({"date": bill.created_at.date(), "description": f"Bill {bill.bill_number}", "debit": bill.grand_total, "credit": 0})
     for payment in customer.payments:
         entries.append({"date": payment.date, "description": f"Payment via {payment.payment_gateway}", "debit": 0, "credit": payment.amount})
 
@@ -326,7 +326,7 @@ def gst_ledger():
         grand_total = total_amount_kgs + total_amount_nos + total_cgst + total_sgst + total_igst
 
         detailed_bills.append({
-            "bill_id": bill.id,
+            "bill_id": bill.bill_number,
             "customer": bill.customer.name,
             "date": bill.created_at.date() if bill.created_at else '',
             "total_qty_kgs": total_qty_kgs,
