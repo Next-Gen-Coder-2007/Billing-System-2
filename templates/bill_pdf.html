@@ -49,10 +49,24 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            height: 300px; /* Fixed height for the table */
+            display: flex;
+            flex-direction: column;
         }
-        .items-table th {
+        .items-table thead {
             background: rgb(226, 226, 226);
             color: black;
+            padding: 14px;
+            text-align: left;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .items-table tbody {
+            display: block;
+            overflow-y: auto; /* Enable vertical scrolling */
+            height: calc(100% - 40px); /* Adjust height to account for the header */
+        }
+        .items-table th {
             padding: 14px;
             text-align: left;
             font-size: 14px;
@@ -124,38 +138,39 @@
 </head>
 <body>
 
-    <table>
-        <tr>
-            <td class="header" colspan="2">
-                <div class="logo">COMPANY LOGO</div>
-                <h1>TAX INVOICE</h1>
-            </td>
-        </tr>
-        <tr>
-            <td class="customer" style="width: 60%;">
-                <span class="section-title">From:</span>
-                <p><strong>Company Name</strong></p>
-                <p>123 Business Street, City Center</p>
-                <p>Mumbai, Maharashtra - 400001</p>
-                <p>GSTIN: 22ABCDE1234F1Z5</p>
-                <p>Phone: +91 98765 43210 | Email: info@company.com</p>
-            </td>
-            <td class="customer">
-                <span class="section-title">Invoice Details:</span>
-                <p><strong>Invoice #:</strong> {{ bill.bill_number }}</p>
-                <p><strong>Date:</strong> {{ bill.created_at.strftime('%d/%m/%Y') }}</p>
-                <div class="divider"></div>
-                <span class="section-title">Bill To:</span>
-                <p><strong> {{ bill.customer.name }}</strong></p>
-                <p> {{ bill.customer.address1 }}</p>
-                <p> {{ bill.customer.address2 }}</p>
-                <p>GSTIN: {{ bill.customer.gstin }}</p>
-                <p>Phone: {{ bill.customer.phone }}</p>
-            </td>
-        </tr>
-    </table>
+<table>
+    <tr>
+        <td class="header" colspan="2">
+            <div class="logo">COMPANY LOGO</div>
+            <h1>TAX INVOICE</h1>
+        </td>
+    </tr>
+    <tr>
+        <td class="customer" style="width: 60%;">
+            <span class="section-title">From:</span>
+            <p><strong>Company Name</strong></p>
+            <p>123 Business Street, City Center</p>
+            <p>Mumbai, Maharashtra - 400001</p>
+            <p>GSTIN: 22ABCDE1234F1Z5</p>
+            <p>Phone: +91 98765 43210 | Email: info@company.com</p>
+        </td>
+        <td class="customer">
+            <span class="section-title">Invoice Details:</span>
+            <p><strong>Invoice #:</strong> {{ bill.bill_number }}</p>
+            <p><strong>Date:</strong> {{ bill.created_at.strftime('%d/%m/%Y') }}</p>
+            <div class="divider"></div>
+            <span class="section-title">Bill To:</span>
+            <p><strong> {{ bill.customer.name }}</strong></p>
+            <p> {{ bill.customer.address1 }}</p>
+            <p> {{ bill.customer.address2 }}</p>
+            <p>GSTIN: {{ bill.customer.gstin }}</p>
+            <p>Phone: {{ bill.customer.phone }}</p>
+        </td>
+    </tr>
+</table>
 
-    <table class="items-table">
+<div class="items-table">
+    <table>
         <thead>
             <tr>
                 <th>S.No</th>
@@ -166,78 +181,84 @@
                 <th>Amount (₹)</th>
             </tr>
         </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>1</td>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.product.hsn_code }}</td>
-                <td>{{ item.quantity }}</td>                
-                <td>{{ "%.2f"|format(item.price) }}</td>
-                <td>{{ "%.2f"|format(item.subtotal) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
     </table>
+    <div style="overflow-y: auto; height: 250px;">
+        <table>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>1</td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.product.hsn_code }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ "%.2f"|format(item.price) }}</td>
+                    <td>{{ "%.2f"|format(item.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    <table class="totals">
-        <tr>
-            <td style="width: 60%; vertical-align: top;">
-                <div class="amount-in-words">
-                    <span class="section-title">Amount in Words:</span>
-                    <p><em>Indian Rupees Twenty Two Thousand Four Hundred Ninety Seven Only</em></p>
-                </div>
+<table class="totals">
+    <tr>
+        <td style="width: 60%; vertical-align: top;">
+            <div class="amount-in-words">
+                <span class="section-title">Amount in Words:</span>
+                <p><em>Indian Rupees Twenty Two Thousand Four Hundred Ninety Seven Only</em></p>
+            </div>
 
-                <div class="bank-details">
-                    <span class="section-title">Bank Details:</span>
-                    <p><strong>Account Name:</strong> Company Name</p>
-                    <p><strong>Bank Name:</strong> National Bank</p>
-                    <p><strong>Account No:</strong> 123456789012</p>
-                    <p><strong>IFSC Code:</strong> NBIN0001234</p>
-                    <p><strong>Branch:</strong> Mumbai Main Branch</p>
-                </div>
-            </td>
-            <td>
-                <table class="totals-inner">
-                    <tr>
-                        <td><strong>Subtotal:</strong></td>
-                        <td class="text-right">₹{{ "%.2f"|format(bill.total_amount) }}</td>
-                    </tr>
-                    {% if bill.cgst and bill.sgst %}
-                    <tr>
-                        <td>CGST ({{ "%.2f"|format(bill.gst_rate / 2 * 100) }}%):</td>
-                        <td class="text-right">₹{{ "%.2f"|format(bill.cgst) }}</td>
-                    </tr>
-                    <tr>
-                        <td>SGST ({{ "%.2f"|format(bill.gst_rate / 2 * 100) }}%):</td>
-                        <td class="text-right">₹{{ "%.2f"|format(bill.sgst) }}</td>
-                    </tr>
-                    {% elif bill.igst %}
-                    <tr>
-                        <td>IGST ({{ "%.2f"|format(bill.gst_rate * 100) }}%):</td>
-                        <td class="text-right">₹{{ "%.2f"|format(bill.igst) }}</td>
-                    </tr>
-                    {% endif %}
-                    <tr>
-                        <td colspan="2"><hr></td>
-                    </tr>
-                    <tr class="grand-total">
-                        <td><strong>Total Amount:</strong></td>
-                        <td class="text-right"><strong>₹{{ "%.2f"|format(bill.grand_total) }}</strong></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <div class="signature">
-                                <p>For Company Name</p>
-                                <br><br>
-                                <p>_________________________</p>
-                                <p>Authorized Signatory</p>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+            <div class="bank-details">
+                <span class="section-title">Bank Details:</span>
+                <p><strong>Account Name:</strong> Company Name</p>
+                <p><strong>Bank Name:</strong> National Bank</p>
+                <p><strong>Account No:</strong> 123456789012</p>
+                <p><strong>IFSC Code:</strong> NBIN0001234</p>
+                <p><strong>Branch:</strong> Mumbai Main Branch</p>
+            </div>
+        </td>
+        <td>
+            <table class="totals-inner">
+                <tr>
+                    <td><strong>Subtotal:</strong></td>
+                    <td class="text-right">₹{{ "%.2f"|format(bill.total_amount) }}</td>
+                </tr>
+                {% if bill.cgst and bill.sgst %}
+                <tr>
+                    <td>CGST ({{ "%.2f"|format(bill.gst_rate / 2 * 100) }}%):</td>
+                    <td class="text-right">₹{{ "%.2f"|format(bill.cgst) }}</td>
+                </tr>
+                <tr>
+                    <td>SGST ({{ "%.2f"|format(bill.gst_rate / 2 * 100) }}%):</td>
+                    <td class="text-right">₹{{ "%.2f"|format(bill.sgst) }}</td>
+                </tr>
+                {% elif bill.igst %}
+                <tr>
+                    <td>IGST ({{ "%.2f"|format(bill.gst_rate * 100) }}%):</td>
+                    <td class="text-right">₹{{ "%.2f"|format(bill.igst) }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td colspan="2"><hr></td>
+                </tr>
+                <tr class="grand-total">
+                    <td><strong>Total Amount:</strong></td>
+                    <td class="text-right"><strong>₹{{ "%.2f"|format(bill.grand_total) }}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="signature">
+                            <p>For Company Name</p>
+                            <br><br>
+                            <p>_________________________</p>
+                            <p>Authorized Signatory</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
 </body>
 </html>
