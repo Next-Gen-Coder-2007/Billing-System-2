@@ -636,8 +636,8 @@ def bill_pdf(bill_id):
         'enable-javascript': True,
         'load-error-handling': 'ignore',
     }
+    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(rendered, False, configuration=config, options=options)
-
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=bill_{bill.id}.pdf'
