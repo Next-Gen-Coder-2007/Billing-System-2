@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Purchase #{{ purchase.id }} - Details{% endblock %}
+
+{% block content %}
+<h2>Purchase Details - purchase #{{ purchase.id }}</h2>
+
+<p><strong>Supplier:</strong> {{ purchase.supplier.name }}</p>
+<p><strong>Bill No:</strong> {{ purchase.bill_no }}</p>
+<p><strong>Date:</strong> {{ purchase.created_at.strftime('%Y-%m-%d') if purchase.created_at else 'N/A' }}</p>
+<table class="table table-bordered mt-4">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>HSN Code</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.hsn_code }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>₹{{ item.subtotal }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+<p><strong>Total:</strong> ₹{{ purchase.total_amount | round(2) }}</p>
+<p><strong>CGST:</strong> ₹{{ purchase.cgst | round(2) }}</p>
+<p><strong>SGST:</strong> ₹{{ purchase.sgst | round(2) }}</p>
+<p><strong>IGST:</strong> ₹{{ purchase.igst | round(2) }}</p>
+<h4><strong>Grand Total:</strong> ₹{{ purchase.grand_total | round(2) }}</h4>
+
+<a href="{{ url_for('purchases') }}" class="btn btn-secondary mt-3 mb-3">Back to purchases</a>
+{% endblock %}

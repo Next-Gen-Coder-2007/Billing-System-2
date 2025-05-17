@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Bills - Billing Software{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Bill List</div>
+    <div class="row m-2">
+        <div class="col">
+            <label for="customer_name">Customer Name</label>
+            <input class="form-control" type="text" name="customer_name" id="customer_name">
+            <label for="bill_no">Bill No</label>
+            <input class="form-control" type="number" name="bill_no" id="bill_no">
+        </div>
+        <div class="col">
+            <label for="start_date">From date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date">
+            <label for="end_date">To date</label>
+            <input type="date" class="form-control" name="end_date" id="end_date">
+        </div>
+        <div class="col">
+            <label for="amount">From Amount</label>
+            <input type="number" class="form-control" name="amount" id="amount">
+            <label for="to_amount">To Amount</label>
+            <input type="number" class="form-control" name="to_amount" id="to_amount">
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Bill No</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Kgs</th> <!-- Change Qty Type to Kgs -->
+                    <th>Nos</th> <!-- Change Total Qty to Nos -->
+                    <th>GST %</th>
+                    <th>Bill Amount</th>
+                    <th>CGST</th>
+                    <th>SGST</th>
+                    <th>IGST</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr>
+                    <td>{{ bill.bill_id }}</td>
+                    <td>{{ bill.customer }}</td>
+                    <td>{{ bill.date.strftime('%Y-%m-%d') if bill.date else 'N/A' }}</td>
+                    <td>{{ bill.total_qty_kgs }}</td>
+                    <td>{{ bill.total_qty_nos }}</td> 
+                    <td>{{ (bill.gst_rate * 100) | round(1) }}%</td>
+                    <td>₹{{ (bill.total_amount_kgs + bill.total_amount_nos) | round(1) }}</td>                    
+                    <td>₹{{ (bill.cgst) | round(1) }}</td>
+                    <td>₹{{ (bill.sgst) | round(1) }}</td>
+                    <td>₹{{ (bill.igst) | round(1) }}</td>
+                    <td>₹{{ (bill.grand_total) | round(1) }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="11" class="text-center">No bills found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                {% if bills %}
+                <tr>
+                    <th colspan="6" class="text-center">TOTAL AMOUNT</th>
+                    <th>₹{{ bill_total | round(1) }}</th>
+                    <th>₹{{ cgst | round(1) }}</th>
+                    <th>₹{{ sgst | round(1) }}</th>
+                    <th>₹{{ igst | round(1) }}</th>
+                    <th>₹{{ total | round(1) }}</th>
+                </tr>
+                {% endif %}
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filters = {
+        customer: document.getElementById("customer_name"),
+        billNo: document.getElementById("bill_no"),
+        startDate: document.getElementById("start_date"),
+        endDate: document.getElementById("end_date"),
+        amountMin: document.getElementById("amount"),
+        amountMax: document.getElementById("to_amount")
+    };
+
+    const rows = document.querySelectorAll("tbody tr");
+
+    function filterTable() {
+        rows.forEach(row => {
+            const billNo = row.children[0]?.textContent.trim();
+            const customer = row.children[1]?.textContent.trim().toLowerCase();
+            const date = row.children[2]?.textContent.trim();
+            const totalAmount = parseFloat(row.children[8]?.textContent.replace(/[₹,]/g, '')) || 0;
+
+            let visible = true;
+
+            if (filters.customer.value.trim() !== "") {
+                visible = visible && customer.includes(filters.customer.value.trim().toLowerCase());
+            }
+
+            if (filters.billNo.value !== "") {
+                visible = visible && billNo === filters.billNo.value;
+            }
+
+            if (filters.startDate.value !== "" || filters.endDate.value !== "") {
+                const rowDate = new Date(date);
+                const start = filters.startDate.value ? new Date(filters.startDate.value) : null;
+                const end = filters.endDate.value ? new Date(filters.endDate.value) : null;
+
+                if (start && end) {
+                    visible = visible && (rowDate >= start && rowDate <= end);
+                } else if (start) {
+                    visible = visible && (rowDate >= start);
+                } else if (end) {
+                    visible = visible && (rowDate <= end);
+                }
+            }
+
+            if (filters.amountMin.value !== "") {
+                visible = visible && totalAmount >= parseFloat(filters.amountMin.value);
+            }
+
+            if (filters.amountMax.value !== "") {
+                visible = visible && totalAmount <= parseFloat(filters.amountMax.value);
+            }
+
+            row.style.display = visible ? "" : "none";
+        });
+    }
+
+    Object.values(filters).forEach(input => {
+        input.addEventListener("input", filterTable);
+    });
+});
+</script>
+{% endblock %}

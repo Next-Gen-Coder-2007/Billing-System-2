@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Bill - Billing Software{% endblock %}
+
+{% block content %}
+<h2>Add New Bill</h2>
+
+<div class="card mb-4">
+    <div class="card-header">Create a New Bill</div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('create_bill') }}">
+            <div class="form-group">
+                <label for="customer_id">Customer</label>
+                <select class="form-control" id="customer_id" name="customer_id" required>
+                    <option value="" disabled selected>Select Customer</option>
+                    {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <hr>
+            <h5>Add Product</h5>
+            <div class="row">
+                <div class="form-group col-md-5">
+                    <input type="text" class="form-control" id="product_name" placeholder="Product Name">
+                </div>
+                <div class="form-group col-md-1">
+                    <input type="text" class="form-control" id="hsn_code" placeholder="HSN Code">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="number" step="0.01" class="form-control" id="price" placeholder="Price">
+                </div>
+                <div class="form-group col-md-1">
+                    <input type="number" class="form-control" id="quantity" placeholder="Quantity">
+                </div>
+                <div class="form-group col-md-1">
+                    <select class="form-control" id="qty_type">
+                        <option value="nos">Nos</option>
+                        <option value="kgs">Kgs</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="button" class="btn btn-primary" id="add-item-btn">Add Product</button>
+                </div>
+            </div>
+            <table class="table table-bordered mt-3" id="bill-items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>HSN</th>
+                        <th>Price</th>
+                        <th colspan="2" class="text-center">Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="form-group">
+                <label for="gst_rate">GST Rate (%)</label>
+                <input type="number" class="form-control" id="gst_rate" name="gst_rate" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="is_interstate">Is this Interstate?</label>
+                <select class="form-control" id="is_interstate" name="is_interstate">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Create Bill</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('add-item-btn').addEventListener('click', function () {
+        var name = document.getElementById('product_name').value;
+        var hsn = document.getElementById('hsn_code').value;
+        var price = document.getElementById('price').value;
+        var quantity = document.getElementById('quantity').value;
+        var qty_type = document.getElementById('qty_type').value;
+
+        if (!name || !hsn || !price || !quantity) {
+            alert("Please fill all product fields.");
+            return;
+        }
+
+        var subtotal = (price * quantity).toFixed(2);
+        var row = `
+            <tr>
+                <td>${name}<input type="hidden" name="product_name" value="${name}"></td>
+                <td>${hsn}<input type="hidden" name="hsn_code" value="${hsn}"></td>
+                <td>${price}<input type="hidden" name="price" value="${price}"></td>
+                <td>${quantity}<input type="hidden" name="quantity" value="${quantity}"></td>
+                <td>${qty_type}<input type="hidden" name="qty_type" value="${qty_type}"></td>
+                <td>₹${subtotal}</td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button></td>
+            </tr>
+        `;
+        document.querySelector('#bill-items-table tbody').insertAdjacentHTML('beforeend', row);
+
+        document.getElementById('product_name').value = '';
+        document.getElementById('hsn_code').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('quantity').value = '';
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-item-btn')) {
+            e.target.closest('tr').remove();
+        }
+    });
+</script>
+{% endblock %}

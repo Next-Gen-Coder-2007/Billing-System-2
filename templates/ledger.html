@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Ledger for {{ customer.name }}</h2>
+
+<button class="btn btn-primary mb-3" data-toggle="modal" data-target="#paymentModal">Add Payment</button>
+<a href="{{ url_for('customer_ledger_pdf', customer_id=customer.id) }}" class="btn btn-danger mb-3" target="_blank">
+    Download PDF
+</a>
+<table class="table table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Debit (Bill)</th>
+            <th>Credit (Payment)</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ entry.description }}</td>
+            <td>{{ entry.debit if entry.debit else '-' }}</td>
+            <td>{{ entry.credit if entry.credit else '-' }}</td>
+            <td>{{ entry.balance }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4>Total Balance: {{ total_balance }}</h4>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form method="POST">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="paymentModalLabel">Add Payment</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="gateway">Payment Gateway</label>
+                <input type="text" name="gateway" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" name="amount" step="0.01" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" name="date" class="form-control" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Save Payment</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

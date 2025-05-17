@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Bill - Billing Software{% endblock %}
+
+{% block content %}
+<h2>Edit Bill</h2>
+
+<div class="card mb-4">
+    <div class="card-header">Edit Bill</div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('edit_bill', bill_id=bill.id) }}">
+            <div class="form-group">
+                <label for="customer_id">Customer</label>
+                <select class="form-control" id="customer_id" name="customer_id" required>
+                    {% for customer in customers %}
+                        <option value="{{ customer.id }}" {% if customer.id == bill.customer_id %} selected {% endif %}>{{ customer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <hr>
+            <h5>Edit Products</h5>
+            <div class="row">
+                <div class="form-group col-md-5">
+                    <input type="text" class="form-control" id="product_name" placeholder="Product Name">
+                </div>
+                <div class="form-group col-md-1">
+                    <input type="text" class="form-control" id="hsn_code" placeholder="HSN Code">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="number" step="0.01" class="form-control" id="price" placeholder="Price">
+                </div>
+                <div class="form-group col-md-1">
+                    <input type="number" class="form-control" id="quantity" placeholder="Quantity">
+                </div>
+                <div class="form-group col-md-1">
+                    <select class="form-control" id="qty_type">
+                        <option value="nos">Nos</option>
+                        <option value="kgs">Kgs</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="button" class="btn btn-primary" id="add-item-btn">Add Product</button>
+                </div>
+            </div>
+
+            <table class="table table-bordered mt-3" id="bill-items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>HSN</th>
+                        <th>Price</th>
+                        <th colspan="2">Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in bill_items %}
+                        <tr>
+                            <td>{{ item.product.name }}<input type="hidden" name="product_name" value="{{ item.product.name }}"></td>
+                            <td>{{ item.product.hsn_code }}<input type="hidden" name="hsn_code" value="{{ item.product.hsn_code }}"></td>
+                            <td>{{ item.price }}<input type="hidden" name="price" value="{{ item.price }}"></td>
+                            <td>{{ item.quantity }}<input type="hidden" name="quantity" value="{{ item.quantity }}"></td>
+                            <td>{{ item.qty_type }}<input type="hidden" name="qty_type" value="{{ item.qty_type }}"></td>
+                            <td>₹{{ item.subtotal }}</td>
+                            <td><button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="form-group">
+                <label for="gst_rate">GST Rate (%)</label>
+                <input type="number" class="form-control" id="gst_rate" name="gst_rate" step="0.01" value="{{ bill.gst_rate * 100 }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="is_interstate">Is this Interstate?</label>
+                <select class="form-control" id="is_interstate" name="is_interstate">
+                    <option value="no" {% if not bill.is_interstate %} selected {% endif %}>No</option>
+                    <option value="yes" {% if bill.is_interstate %} selected {% endif %}>Yes</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Update Bill</button>
+            <a href="{{ url_for('bills') }}" class="btn btn-warning">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('add-item-btn').addEventListener('click', function () {
+        var name = document.getElementById('product_name').value;
+        var hsn = document.getElementById('hsn_code').value;
+        var price = document.getElementById('price').value;
+        var quantity = document.getElementById('quantity').value;
+        var qty_type = document.getElementById('qty_type').value;
+
+        if (!name || !hsn || !price || !quantity) {
+            alert("Please fill all product fields.");
+            return;
+        }
+
+        var subtotal = (price * quantity).toFixed(2);
+        var row = `
+            <tr>
+                <td>${name}<input type="hidden" name="product_name" value="${name}"></td>
+                <td>${hsn}<input type="hidden" name="hsn_code" value="${hsn}"></td>
+                <td>${price}<input type="hidden" name="price" value="${price}"></td>
+                <td>${quantity}<input type="hidden" name="quantity" value="${quantity}"></td>
+                <td>${qty_type}<input type="hidden" name="qty_type" value="${qty_type}"></td>
+                <td>₹${subtotal}</td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button></td>
+            </tr>
+        `;
+        document.querySelector('#bill-items-table tbody').insertAdjacentHTML('beforeend', row);
+
+        document.getElementById('product_name').value = '';
+        document.getElementById('hsn_code').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('quantity').value = '';
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-item-btn')) {
+            e.target.closest('tr').remove();
+        }
+    });
+</script>
+{% endblock %}
