@@ -33,27 +33,11 @@ def calculate_gst(total, gst_rate, is_interstate):
     grand_total = round(total + igst + cgst + sgst)
     return cgst, sgst, igst, grand_total
 
-def generate_bill_number():
-    # Get current year and month
-    now = datetime.now()
-    year = now.year
-    month = now.month
-    
-    # Format: BILL-YYYYMM-001
-    prefix = f"BILL-{year}{month:02d}-"
-    
-    # Find the highest bill number with this prefix
-    last_bill = Bill.query.filter(Bill.bill_number.startswith(prefix)) \
-                         .order_by(Bill.bill_number.desc()).first()
-    
+def get_next_bill_number():
+    last_bill = Bill.query.order_by(Bill.number.desc()).first()
     if last_bill:
-        try:
-            # Extract the numeric part and increment
-            last_num = int(last_bill.bill_number.split('-')[-1])
-            return f"{prefix}{last_num + 1:03d}"
-        except (ValueError, IndexError):
-            pass
-    return f"{prefix}001"  # First bill of the month
+        return last_bill.number + 1
+    return 1  # Start from 1 if no bills exist
 
 def create_dummy_data():
     with app.app_context():
