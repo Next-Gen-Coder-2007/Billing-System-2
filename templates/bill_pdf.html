@@ -1,0 +1,244 @@
+i want to make pdf of this cide <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill {{ bill.bill_number }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 30px;
+            background-color: #f4f7fc;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            color: black;
+        }
+        p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        .header {
+            background: whitesmoke;
+            color: black;
+            padding: 25px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .customer {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        .section-title {
+            font-weight: bold;
+            color: #2b5876;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+        }
+        .items-table {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .items-table th {
+            background: rgb(226, 226, 226);
+            color: black;
+            padding: 14px;
+            text-align: left;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .items-table td {
+            padding: 12px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .items-table tr:nth-child(even) td {
+            background-color: #f7f9fc;
+        }
+        .items-table tr:hover td {
+            background-color: #eef6ff;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .totals {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 0 0 12px 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .totals-inner {
+            width: 100%;
+        }
+        .totals-inner td {
+            padding: 10px 5px;
+            font-size: 15px;
+        }
+        .grand-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d63031;
+        }
+        .bank-details {
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #2ecc71;
+        }
+        .signature {
+            text-align: right;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .amount-in-words {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        .divider {
+            border-top: 2px dashed #6a89cc;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <table>
+        <tr>
+            <td class="header" colspan="2">
+                <div class="logo">COMPANY LOGO</div>
+                <h1>TAX INVOICE</h1>
+            </td>
+        </tr>
+        <tr>
+            <td class="customer" style="width: 60%;">
+                <span class="section-title">From:</span>
+                <p><strong>Company Name</strong></p>
+                <p>123 Business Street, City Center</p>
+                <p>Mumbai, Maharashtra - 400001</p>
+                <p>GSTIN: 22ABCDE1234F1Z5</p>
+                <p>Phone: +91 98765 43210 | Email: info@company.com</p>
+            </td>
+            <td class="customer">
+                <span class="section-title">Invoice Details:</span>
+                <p><strong>Invoice #:</strong> {{ bill.bill_number }}</p>
+                <p><strong>Date:</strong> {{ bill.created_at.strftime('%d/%m/%Y') }}</p>
+                <div class="divider"></div>
+                <span class="section-title">Bill To:</span>
+                <p><strong> {{ bill.customer.name }}</strong></p>
+                <p> {{ bill.customer.address1 }}</p>
+                <p> {{ bill.customer.address2 }}</p>
+                <p>GSTIN: {{ bill.customer.gstin }}</p>
+                <p>Phone: {{ bill.customer.phone }}</p>
+            </td>
+        </tr>
+    </table>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Description</th>
+                <th>HSN Code</th>
+                <th>Qty</th>
+                <th>Rate (₹)</th>
+                <th>Amount (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>1</td>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.product.hsn_code }}</td>
+                <td>{{ item.quantity }}</td>                
+                <td>{{ "%.2f"|format(item.price) }}</td>
+                <td>{{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals">
+        <tr>
+            <td style="width: 60%; vertical-align: top;">
+                <div class="amount-in-words">
+                    <span class="section-title">Amount in Words:</span>
+                    <p><em>Indian Rupees Twenty Two Thousand Four Hundred Ninety Seven Only</em></p>
+                </div>
+
+                <div class="bank-details">
+                    <span class="section-title">Bank Details:</span>
+                    <p><strong>Account Name:</strong> Company Name</p>
+                    <p><strong>Bank Name:</strong> National Bank</p>
+                    <p><strong>Account No:</strong> 123456789012</p>
+                    <p><strong>IFSC Code:</strong> NBIN0001234</p>
+                    <p><strong>Branch:</strong> Mumbai Main Branch</p>
+                </div>
+            </td>
+            <td>
+                <table class="totals-inner">
+                    <tr>
+                        <td><strong>Subtotal:</strong></td>
+                        <td class="text-right">₹{{ "%.2f"|format(bill.total_amount) }}</td>
+                    </tr>
+                    {% if bill.cgst and bill.sgst %}
+                    <tr>
+                        <td>CGST ({{ "%.2f"|format(bill.gst_rate / 2 * 100) }}%):</td>
+                        <td class="text-right">₹{{ "%.2f"|format(bill.cgst) }}</td>
+                    </tr>
+                    <tr>
+                        <td>SGST ({{ "%.2f"|format(bill.gst_rate / 2 * 100) }}%):</td>
+                        <td class="text-right">₹{{ "%.2f"|format(bill.sgst) }}</td>
+                    </tr>
+                    {% elif bill.igst %}
+                    <tr>
+                        <td>IGST ({{ "%.2f"|format(bill.gst_rate * 100) }}%):</td>
+                        <td class="text-right">₹{{ "%.2f"|format(bill.igst) }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td colspan="2"><hr></td>
+                    </tr>
+                    <tr class="grand-total">
+                        <td><strong>Total Amount:</strong></td>
+                        <td class="text-right"><strong>₹{{ "%.2f"|format(bill.grand_total) }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div class="signature">
+                                <p>For Company Name</p>
+                                <br><br>
+                                <p>_________________________</p>
+                                <p>Authorized Signatory</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
