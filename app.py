@@ -10,8 +10,7 @@ import os
 
 fake = Faker()
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://avnadmin:AVNS_3MFk0LeCjUtGdP0kAbL@mysql-375f5a66-billing-system2025.g.aivencloud.com:18966/defaultdb?ssl-mode=REQUIRED"
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://avnadmin:AVNS_3MFk0LeCjUtGdP0kAbL@mysql-375f5a66-billing-system2025.g.aivencloud.com:18966/defaultdb?ssl-mode=REQUIRED"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
