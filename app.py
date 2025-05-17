@@ -10,9 +10,13 @@ import os
 
 fake = Faker()
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://avnadmin:AVNS_3MFk0LeCjUtGdP0kAbL@mysql-375f5a66-billing-system2025.g.aivencloud.com:18966/defaultdb?ssl-mode=REQUIRED"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://avnadmin:AVNS_3MFk0LeCjUtGdP0kAbL@mysql-375f5a66-billing-system2025.g.aivencloud.com:18966/defaultdb"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {
+        'ssl': {'ssl_ca': '/path/to/ca.pem'}
+    }
+}
 db.init_app(app)
 
 with app.app_context():
@@ -271,7 +275,7 @@ def customer_ledger_pdf(customer_id):
 
     rendered = render_template("ledger_pdf.html", customer=customer, entries=entries, total_balance=balance)
 
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(rendered, False, configuration=config)
 
     response = make_response(pdf)
@@ -465,7 +469,7 @@ def supplier_ledger_pdf(supplier_id):
 
     rendered = render_template("supplier_ledger_pdf.html", supplier=supplier, entries=entries, total_balance=balance)
 
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
     pdf = pdfkit.from_string(rendered, False, configuration=config)
 
     response = make_response(pdf)
@@ -616,25 +620,6 @@ def delete_bill(bill_id):
     db.session.commit()
     return redirect(url_for('bills'))
 
-@app.route("/bill/<int:bill_id>/pdf")
-def bill_pdf(bill_id):
-    bill = Bill.query.get_or_404(bill_id)
-    items = BillItem.query.filter_by(bill_id=bill.id).all()
-
-    rendered = render_template("bill_pdf_template.html", bill=bill, items=items)
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    options = {
-        'enable-local-file-access': None,
-        'no-stop-slow-scripts': None,
-        'enable-javascript': True,
-        'load-error-handling': 'ignore',
-    }
-    pdf = pdfkit.from_string(rendered, False, configuration=config, options=options)
-
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'inline; filename=bill_{bill.id}.pdf'
-    return response
 # ------------------- Purchase Routes -------------------
 @app.route('/purchases')
 def purchases():
