@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from models import db, Customer, Supplier, Product, Bill, BillItem, Purchase, PurchaseItem, Payment, SupplierPayment
 from datetime import datetime
-from weasyprint import HTML
 from faker import Faker
 import random
 from sqlalchemy import func, extract
 from datetime import date, timedelta
+import pdfkit
 import os
 
 fake = Faker()
