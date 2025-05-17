@@ -31,6 +31,7 @@ class Product(db.Model):
 
 class Bill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    bill_number = db.Column(db.String(20), unique=True, nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     is_interstate = db.Column(db.Boolean, default=False)
     gst_rate = db.Column(db.Float, nullable=False)
