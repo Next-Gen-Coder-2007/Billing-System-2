@@ -629,7 +629,7 @@ def bill_pdf(bill_id):
     items = BillItem.query.filter_by(bill_id=bill.id).all()
 
     rendered = render_template("bill_pdf.html", bill=bill, items=items)
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    # config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
     options = {
         'enable-local-file-access': None,
         'no-stop-slow-scripts': None,
