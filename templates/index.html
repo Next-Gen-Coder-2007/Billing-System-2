@@ -81,7 +81,7 @@
                     <h5 class="card-title">Recent Bills</h5>
                     <ul class="list-unstyled">
                         {% for bill in recent_bills %}
-                        <li><a href="{{ url_for('view_bill', bill_id=bill.id) }}" class="text-white">{{ bill.id }} - ₹{{ bill.grand_total }}</a></li>
+                        <li><a href="{{ url_for('view_bill', bill_id=bill.id) }}" class="text-white">{{ bill.bill_number }} - ₹{{ bill.grand_total }}</a></li>
                         {% else %}
                         <li>No recent bills</li>
                         {% endfor %}
