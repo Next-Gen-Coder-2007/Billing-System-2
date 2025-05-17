@@ -45,7 +45,7 @@
             <tbody>
                 {% for bill in bills %}
                 <tr>
-                    <td>{{ bill.bill_id }}</td>
+                    <td>{{ bill.bill_number }}</td>
                     <td>{{ bill.customer }}</td>
                     <td>{{ bill.date.strftime('%Y-%m-%d') if bill.date else 'N/A' }}</td>
                     <td>{{ bill.total_qty_kgs }}</td>
