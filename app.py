@@ -630,17 +630,12 @@ def bill_pdf(bill_id):
 
     rendered = render_template("bill_pdf.html", bill=bill, items=items)
     # config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    options = {
-        'enable-local-file-access': None,
-        'no-stop-slow-scripts': None,
-        'enable-javascript': True,
-        'load-error-handling': 'ignore',
-    }
+
     config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-    pdf = pdfkit.from_string(rendered, False, configuration=config, options=options)
+    pdf = pdfkit.from_string(rendered, False, configuration=config)
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'inline; filename=bill_{bill.id}.pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=bill_{bill.bill_number}.pdf'
     return response
 # ------------------- Purchase Routes -------------------
 @app.route('/purchases')
