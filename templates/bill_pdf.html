@@ -174,7 +174,8 @@
             <td>1</td>
             <td>{{ item.product.name }}</td>
             <td>{{ item.product.hsn_code }}</td>
-            <td>{{ item.quantity }}</td>                
+            <td>{{ item.quantity }}</td> 
+            <td>{{ item.product.qty_type }}</td>                
             <td>{{ "%.2f"|format(item.price) }}</td>
             <td>{{ "%.2f"|format(item.subtotal) }}</td>
         </tr>
