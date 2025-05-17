@@ -21,7 +21,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 db.init_app(app)
 
 with app.app_context():
-    db.drop_all()
     db.create_all()
 
 def calculate_gst(total, gst_rate, is_interstate):
