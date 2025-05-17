@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from models import db, Customer, Supplier, Product, Bill, BillItem, Purchase, PurchaseItem, Payment, SupplierPayment
 from datetime import datetime
+from weasyprint import HTML
 from faker import Faker
 import random
 from sqlalchemy import func, extract
 from datetime import date, timedelta
-import pdfkit
 import os
 
 fake = Faker()
@@ -262,6 +262,9 @@ def customer_ledger(customer_id):
 
     return render_template("ledger.html", customer=customer, entries=entries, total_balance=balance)
 
+from weasyprint import HTML
+from flask import make_response, render_template
+
 @app.route("/customers/<int:customer_id>/ledger/pdf")
 def customer_ledger_pdf(customer_id):
     customer = Customer.query.get_or_404(customer_id)
@@ -280,13 +283,14 @@ def customer_ledger_pdf(customer_id):
 
     rendered = render_template("ledger_pdf.html", customer=customer, entries=entries, total_balance=balance)
 
-    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-    pdf = pdfkit.from_string(rendered, False, configuration=config)
+    # Convert HTML to PDF using WeasyPrint
+    pdf = HTML(string=rendered).write_pdf()
 
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=ledger_{customer.id}.pdf'
     return response
+
 
 @app.route("/customers/gst_ledger")
 def gst_ledger():
@@ -443,6 +447,10 @@ def supplier_ledger(supplier_id):
 
     return render_template("supplier_ledger.html", supplier=supplier, entries=entries, total_balance=balance)
 
+from weasyprint import HTML
+from flask import make_response, render_template
+from datetime import datetime
+
 @app.route("/suppliers/<int:supplier_id>/ledger/pdf")
 def supplier_ledger_pdf(supplier_id):
     supplier = Supplier.query.get_or_404(supplier_id)
@@ -474,8 +482,8 @@ def supplier_ledger_pdf(supplier_id):
 
     rendered = render_template("supplier_ledger_pdf.html", supplier=supplier, entries=entries, total_balance=balance)
 
-    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-    pdf = pdfkit.from_string(rendered, False, configuration=config)
+    # Use WeasyPrint to render PDF
+    pdf = HTML(string=rendered).write_pdf()
 
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
