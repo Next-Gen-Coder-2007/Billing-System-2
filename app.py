@@ -623,6 +623,25 @@ def delete_bill(bill_id):
     db.session.commit()
     return redirect(url_for('bills'))
 
+@app.route("/bill/<int:bill_id>/pdf")
+def bill_pdf(bill_id):
+    bill = Bill.query.get_or_404(bill_id)
+    items = BillItem.query.filter_by(bill_id=bill.id).all()
+
+    rendered = render_template("bill_pdf.html", bill=bill, items=items)
+    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    options = {
+        'enable-local-file-access': None,
+        'no-stop-slow-scripts': None,
+        'enable-javascript': True,
+        'load-error-handling': 'ignore',
+    }
+    pdf = pdfkit.from_string(rendered, False, configuration=config, options=options)
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=bill_{bill.id}.pdf'
+    return response
 # ------------------- Purchase Routes -------------------
 @app.route('/purchases')
 def purchases():
