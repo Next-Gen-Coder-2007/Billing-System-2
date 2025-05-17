@@ -24,7 +24,7 @@
             <tbody>
                 {% for bill in bills %}
                 <tr>
-                    <td>{{ bill.id }}</td>
+                    <td>{{ bill.bill_number }}</td>
                     <td>{{ bill.customer.name }}</td>
                     <td>{{ bill.created_at.strftime('%Y-%m-%d') if bill.created_at else 'N/A'  }}</td>
                     <td>₹{{ bill.grand_total }}</td>
