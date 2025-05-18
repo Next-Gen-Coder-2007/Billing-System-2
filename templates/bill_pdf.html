@@ -167,9 +167,11 @@
         </tr>
     </thead>
     <tbody>
+        {% set slno = 0 %}
         {% for item in items %}
+        {% set slno = slno + 1 %}
         <tr>
-            <td>{{ slno += 1 }}</td>
+            <td>{{ slno }}</td>
             <td>{{ item.product.name }}</td>
             <td>{{ item.product.hsn_code }}</td>
             <td>{{ item.quantity }}</td> 
