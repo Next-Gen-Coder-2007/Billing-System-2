@@ -613,8 +613,7 @@ def edit_bill(bill_id):
 
     customers = Customer.query.all()
     products = Product.query.all()
-    slno = 0
-    return render_template('edit_bill.html', bill=bill, customers=customers, products=products, bill_items=bill_items, slno = slno)
+    return render_template('edit_bill.html', bill=bill, customers=customers, products=products, bill_items=bill_items)
 
 @app.route('/delete_bill/<int:bill_id>', methods=['POST'])
 def delete_bill(bill_id):
@@ -628,8 +627,8 @@ def delete_bill(bill_id):
 def bill_pdf(bill_id):
     bill = Bill.query.get_or_404(bill_id)
     items = BillItem.query.filter_by(bill_id=bill.id).all()
-
-    rendered = render_template("bill_pdf.html", bill=bill, items=items)
+    slno = 0
+    rendered = render_template("bill_pdf.html", bill=bill, items=items, slno=slno)
     # config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
 
     config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
