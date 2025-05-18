@@ -613,7 +613,8 @@ def edit_bill(bill_id):
 
     customers = Customer.query.all()
     products = Product.query.all()
-    return render_template('edit_bill.html', bill=bill, customers=customers, products=products, bill_items=bill_items)
+    slno = 0
+    return render_template('edit_bill.html', bill=bill, customers=customers, products=products, bill_items=bill_items, slno = slno)
 
 @app.route('/delete_bill/<int:bill_id>', methods=['POST'])
 def delete_bill(bill_id):
