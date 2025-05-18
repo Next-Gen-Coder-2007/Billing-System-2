@@ -627,8 +627,7 @@ def delete_bill(bill_id):
 def bill_pdf(bill_id):
     bill = Bill.query.get_or_404(bill_id)
     items = BillItem.query.filter_by(bill_id=bill.id).all()
-    slno = 0
-    rendered = render_template("bill_pdf.html", bill=bill, items=items, slno=slno)
+    rendered = render_template("bill_pdf.html", bill=bill, items=items)
     # config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
 
     config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
